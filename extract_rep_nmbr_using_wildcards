@@ -1,0 +1,126 @@
+Sub ExtractRepertor10_OnlyWildcards()     'this code works flawlessly
+Application.ScreenUpdating = False       'this code is assigned to button #10
+
+    Dim wordApp As Word.Application
+    Dim wordDoc As Word.Document
+    Dim excelApp As Excel.Application
+    Dim rng As Word.Range
+    Dim kompar As Word.Range
+    Dim ws As Worksheet
+    Dim regEx As Object
+    Dim matches As Collection
+    Dim match As Variant
+    Dim repNmbr As String
+    Dim cesja As Range
+    
+    Dim startPos As Long
+    Dim endPos As Long
+
+   'Assigning object variables
+    Set wordApp = GetObject(, "Word.Application")      'ActiveX can't create object is when
+    Set excelApp = GetObject(, "Excel.Application")    'there is no Word document open;
+    Set wordDoc = wordApp.ActiveDocument
+    Set ws = excelApp.ActiveSheet
+    Set rng = wordApp.ActiveDocument.Content
+    Set matches = New Collection
+    Set cesja = ActiveSheet.Range("A10:J50").Find("cesja /", , xlValues)
+    Debug.Print cesja.address
+   
+    With wordApp.ActiveDocument.Range
+         With .Find
+             .Text = "<[0-9 ]{1;7}/[0-9]{4}>"
+             .MatchWildcards = True
+             .Wrap = wdFindStop
+             .Forward = True
+             .Execute
+         End With
+      If .Find.Found = True Then matches.Add Replace(.Text, " ", "")
+      'If .Find.Found = True Then matches.Add .text
+      Debug.Print "# of items is"; matches.Count
+      'If .Find.Found = True Then ActiveSheet.Range("G30").Value = Replace(.text, " ", "")
+    End With
+      
+    With wordApp.ActiveDocument.Range
+         With .Find
+             .Text = "<[0-9]{2}.[0-9]{2}.[0-9]{4}r."
+             .MatchWildcards = True
+             .Wrap = wdFindStop
+             .Forward = True
+             .Execute
+         End With
+      If .Find.Found = True Then matches.Add .Text
+      Debug.Print "# of items is"; matches.Count
+    End With
+
+    For Each match In matches
+      Debug.Print match
+    Next match
+    
+    'ws.Range("B31").Value = "Rep. A " & matches(1) & " dnia " & matches(2)
+    cesja.Offset(0, 1) = "Rep. A " & matches(1) & " dnia " & matches(2)
+    
+    
+    'determine the Notary
+    startPos = InStr(1, rng, "NOTARIALNY") + Len("NOTARIALNY")      'here we get 506;
+    endPos = InStr(startPos, rng, "ulicy Ordynackiej") - 1              'here we get 691;
+    rng.SetRange Start:=startPos, End:=endPos
+    Debug.Print rng
+    
+    
+    With rng.Find
+       .Text = "zastępcą notarialnym Bartoszem Kuligowskim"
+       .MatchWildcards = False
+       .Wrap = wdFindStop
+       .Forward = True
+       .Execute
+   'If .Found = True Then ws.Range("F31").Value = "BARTEK"
+    If .Found = True Then cesja.Offset(0, 5) = "BARTEK"
+    End With
+    
+    
+    With rng.Find
+       .Text = "zastępcą notarialnym Kają Czerwonką-Kęska"
+       .MatchWildcards = False
+       .Wrap = wdFindStop
+       .Forward = True
+       .Execute
+   'If .Found = True Then ws.Range("F31").Value = "KAJA"
+    If .Found = True Then cesja.Offset(0, 5) = "KAJA"
+    End With
+    
+    
+    With rng.Find
+       .Text = "Karoliną Klarą Aldoną Zofią KWIATKOWSKĄ-CZAŻASTĄ-ZANDBERG"
+       .MatchWildcards = False
+       .Wrap = wdFindStop
+       .Forward = True
+       .Execute
+   'If .Found = True Then ws.Range("F31").Value = "DANUSIA"
+    If .Found = True Then cesja.Offset(0, 5) = "DANUSIA"
+    End With
+    
+    
+    With rng.Find
+       .Text = "Anną Ewą DAŃKO-ROESLER"
+       .MatchWildcards = False
+       .Wrap = wdFindStop
+       .Forward = True
+       .Execute
+   'If .Found Then ws.Range("F31").Value = "ANIA"
+    If .Found = True Then cesja.Offset(0, 5) = "ANIA"
+    End With
+    
+    
+    With rng.Find
+       .Text = "Tamarą Joanną ŻURAKOWSKĄ"
+       .MatchWildcards = False
+       .Wrap = wdFindStop
+       .Forward = True
+       .Execute
+   'If .Found = True Then ws.Range("F31").Value = "TAMARA"
+    If .Found = True Then cesja.Offset(0, 5) = "TAMARA"
+    End With
+    
+    
+Application.ScreenUpdating = True
+End Sub
